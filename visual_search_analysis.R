@@ -63,7 +63,8 @@ results_anova <- aggregated_results %>%
   anova_test(dv = filtered_zLogRT, wid = subjectNumber,
              within = c(distractorCount, featureContrast), detailed = TRUE)
 get_anova_table(results_anova)
-
+# result: effect of number of distractors, feature contrast, and interaction
+# are all statistically significant 
 
 # note: anovas only confirm that means are different between groups; do post-hoc
 # tests to confirm the direction of the observed effects
@@ -76,73 +77,39 @@ distract_pwc <- aggregated_results %>%
   pairwise_t_test(filtered_zLogRT ~ distractorCount, paired = TRUE, 
                   p.adjust.method = "bonferroni", detailed = TRUE)
 distract_pwc
+# result: participants had statistically significant faster RTs when there were 
+# 5 distractors compared to when there were 10 distractors
 
 # pairwise comparisons - feature contrast
 fc_pwc <- aggregated_results %>% 
   pairwise_t_test(filtered_zLogRT ~ featureContrast, paired = TRUE,
                   p.adjust.method = "bonferroni", detailed = TRUE)
 fc_pwc
+# result: participants had statistically significant faster RTs when there was 
+# contrast compared to when there was no contrast
 
 
 # post-hoc tests for significant two-way interaction----------------------------
 
-# since experiment is 2x2 within subjects, simple effect anova gives the same
-# results as paired t-test; both are included
-
-# simple effect anova - distractors
-distract_se_tw <- aggregated_results %>% 
-  group_by(featureContrast) %>% 
-  anova_test(dv = filtered_zLogRT, wid = subjectNumber,
-             within = distractorCount, detailed = TRUE) %>% 
-  get_anova_table() %>% 
-  adjust_pvalue(method = "bonferroni")
-distract_se_tw
-
-# pairwise comparisons between 5 and 10 distractors
-distract_pwc_tw <- aggregated_results %>% 
-  group_by(featureContrast) %>% 
-  pairwise_t_test(filtered_zLogRT ~ distractorCount, paired = TRUE,
+# pairwise comparisons - experimental conditions
+ec_pwc_tw <- aggregated_results %>% 
+  pairwise_t_test(filtered_zLogRT ~ condition, paired = TRUE,
                   p.adjust.method = "bonferroni", detailed = TRUE)
-distract_pwc_tw
+ec_pwc_tw
+# result: 
+# participants had statistically significant faster RTs for: 
+#   5 distractors + contrast trials than 10 distractors + contrast trials
+#   5 distractors + no contrast trials than 10 distractors + no contrast trials
+#   5 distractors + contrast trials than 10 distractors + no contrast trials
+#   5 distractors + no contrast trials than 10 distractors + contrast trials
+#   10 distractors + contrast trials than 10 distractors + no contrast trials
+#   5 distractors + contrast trials than 5 distractors + no contrast trials *
+# * -> p-value for this comparison is just about equal to 0.05. Therefore, 
+# while it can be considered statistically significant, this should be noted
+# when interpreting the magnitude of the results. 
 
-# simple effect anova - feature contrast
-fc_se_tw <- aggregated_results %>% 
-  group_by(distractorCount) %>% 
-  anova_test(dv = filtered_zLogRT, wid = subjectNumber,
-             within = featureContrast, detailed = TRUE) %>% 
-  get_anova_table() %>% 
-  adjust_pvalue(method = "bonferroni")
-fc_se_tw
-
-# pairwise comparisons between contrast and no contrast
-fc_pwc_tw <- aggregated_results %>% 
-  group_by(distractorCount) %>% 
-  pairwise_t_test(filtered_zLogRT ~ featureContrast, paired = TRUE,
-                  p.adjust.method = "bonferroni", detailed = TRUE)
-fc_pwc_tw
 
 # visualization-----------------------------------------------------------------
-
-# box plot - experimental conditions
-ggplot(data = aggregated_results, aes(x = distractorCount, y = filtered_zLogRT,
-                                      fill = featureContrast)) + 
-  geom_boxplot(outlier.shape = NA) +
-  scale_fill_discrete(name = "feature\ncontrast") +
-  ylim(-.75,.75) +
-  xlab("number of distractors") +
-  ylab("mean normalized response times")
-
-# line plot - experimental conditions
-ggplot(data = summ_stats, aes(x = distractorCount, y = mean, 
-                              group = featureContrast)) + 
-  geom_line(aes(linetype = featureContrast)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean +se), width = .1) +
-  scale_linetype_discrete(name = "feature\ncontrast") +
-  ylim(-.75,.75) +
-  xlab("number of distractors") +
-  ylab("mean normalized response times")
-
 
 # box plot - distractors
 ggplot(data = aggregated_results, aes(x = distractorCount, 
@@ -177,6 +144,27 @@ ggplot(data = summ_fc, aes(x = featureContrast, y = mean, group = 1)) +
   ylim(-.75,.75) +
   xlab("feature contrast") +
   ylab("mean normalized response times")
+
+# box plot - experimental conditions
+ggplot(data = aggregated_results, aes(x = distractorCount, y = filtered_zLogRT,
+                                      fill = featureContrast)) + 
+  geom_boxplot(outlier.shape = NA) +
+  scale_fill_discrete(name = "feature\ncontrast") +
+  ylim(-.75,.75) +
+  xlab("number of distractors") +
+  ylab("mean normalized response times")
+
+# line plot - experimental conditions
+ggplot(data = summ_stats, aes(x = distractorCount, y = mean, 
+                              group = featureContrast)) + 
+  geom_line(aes(linetype = featureContrast)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean +se), width = .1) +
+  scale_linetype_discrete(name = "feature\ncontrast") +
+  ylim(-.75,.75) +
+  xlab("number of distractors") +
+  ylab("mean normalized response times")
+
 
 # ------------------------------------------------------------------------------
 # reference: https://www.datanovia.com/en/lessons/repeated-measures-anova-in-r/#two-way-repeated-measures-anova
