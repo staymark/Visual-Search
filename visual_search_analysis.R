@@ -1,6 +1,7 @@
-# load "rstatix" and "tidyverse" packages---------------------------------------
+# load packages-----------------------------------------------------------------
 library("tidyverse")
 library("rstatix")
+library("ggpubr")
 
 
 # load data---------------------------------------------------------------------
@@ -43,18 +44,42 @@ summ_fc
 
 # assumption checks ------------------------------------------------------------
 
-# assumption check 1 - outliers
+# assumption check 1 - identify extreme outliers
+
 aggregated_results %>% 
   group_by(distractorCount, featureContrast) %>% 
   identify_outliers(filtered_zLogRT)
-# result: no extreme outliers
+# interpretation: no extreme outliers
 
 # assumption check 2 - normality assumption
+
+# shapiro-wilk test
 aggregated_results %>% 
   group_by(distractorCount, featureContrast) %>% 
   shapiro_test(filtered_zLogRT)
-# result:filtered_zLogRT is normally distributed for each experimental condition
+# interpretation: filtered_zLogRT is normally distributed for 
+# each experimental condition
 
+# qqplot inspection
+ggqqplot(data = aggregated_results, x = "filtered_zLogRT", 
+         ggtheme = theme_bw()) + 
+  facet_grid(distractorCount ~ featureContrast, labeller = "label_both")
+# interpretation: filtered_zLogRT appears to be normally distributed for
+# each experimental condition
+
+# assumption check 3 - homogeneity of variances
+
+# levene's test
+aggregated_results %>% 
+  levene_test(filtered_zLogRT ~ distractorCount*featureContrast)
+# interpretation: no evidence to suggest that variances of RTs
+# are statistically significant
+
+# bartlett's test
+bartlett.test(filtered_zLogRT ~ interaction(distractorCount, featureContrast), 
+              data = aggregated_results)
+# interpretation: no evidence to suggest that variances of RTs
+# are statistically significant  
 
 # anova ------------------------------------------------------------------------
 
@@ -62,6 +87,7 @@ aggregated_results %>%
 results_anova <- aggregated_results %>% 
   anova_test(dv = filtered_zLogRT, wid = subjectNumber,
              within = c(distractorCount, featureContrast), detailed = TRUE)
+results_anova
 get_anova_table(results_anova)
 # result: effect of number of distractors, feature contrast, and interaction
 # are all statistically significant 
@@ -167,4 +193,6 @@ ggplot(data = summ_stats, aes(x = distractorCount, y = mean,
 
 
 # ------------------------------------------------------------------------------
-# reference: https://www.datanovia.com/en/lessons/repeated-measures-anova-in-r/#two-way-repeated-measures-anova
+# References:
+# https://www.datanovia.com/en/lessons/repeated-measures-anova-in-r/#two-way-repeated-measures-anova
+# https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/#:~:text=Bartlett's%20test%3A%20Compare%20the%20variances,robust%20against%20departures%20from%20normality.
