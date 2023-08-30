@@ -73,13 +73,13 @@ ggqqplot(data = aggregated_results, x = "filtered_zLogRT",
 aggregated_results %>% 
   levene_test(filtered_zLogRT ~ distractorCount*featureContrast)
 # interpretation: no evidence to suggest that variances of RTs
-# are statistically significant
+# are significantly different
 
 # bartlett's test
 bartlett.test(filtered_zLogRT ~ interaction(distractorCount, featureContrast), 
               data = aggregated_results)
 # interpretation: no evidence to suggest that variances of RTs
-# are statistically significant  
+# are significantly different  
 
 # anova ------------------------------------------------------------------------
 
