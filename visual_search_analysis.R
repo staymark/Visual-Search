@@ -81,6 +81,7 @@ bartlett.test(filtered_zLogRT ~ interaction(distractorCount, featureContrast),
 # interpretation: no evidence to suggest that variances of RTs
 # are significantly different  
 
+
 # anova ------------------------------------------------------------------------
 
 # two-way repeated measures anova
@@ -137,6 +138,8 @@ ec_pwc_tw
 
 # visualization-----------------------------------------------------------------
 
+# plots saved as 600x380
+
 # box plot - distractors
 ggplot(data = aggregated_results, aes(x = distractorCount, 
                                       y = filtered_zLogRT)) + 
@@ -152,7 +155,9 @@ ggplot(data = summ_distract, aes(x = distractorCount, y = mean, group = 1)) +
   geom_errorbar(aes(ymin = mean - se, ymax = mean +se), width = .1) +
   ylim(-.75,.75) +
   xlab("number of distractors") +
-  ylab("mean normalized response times")
+  ylab("mean normalized response times") +
+  ggtitle("a") +
+  theme(plot.title = element_text(hjust = -0.075, face = "bold", size = 30))
   
 # box plot - feature contrast
 ggplot(data = aggregated_results, aes(x = featureContrast, 
@@ -169,7 +174,9 @@ ggplot(data = summ_fc, aes(x = featureContrast, y = mean, group = 1)) +
   geom_errorbar(aes(ymin = mean - se, ymax = mean +se), width = .1) +
   ylim(-.75,.75) +
   xlab("feature contrast") +
-  ylab("mean normalized response times")
+  ylab("mean normalized response times") +
+  ggtitle("b") +
+  theme(plot.title = element_text(hjust = -0.075, face = "bold", size = 30))
 
 # box plot - experimental conditions
 ggplot(data = aggregated_results, aes(x = distractorCount, y = filtered_zLogRT,
@@ -185,11 +192,13 @@ ggplot(data = summ_stats, aes(x = distractorCount, y = mean,
                               group = featureContrast)) + 
   geom_line(aes(linetype = featureContrast)) +
   geom_point() +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean +se), width = .1) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = .1) +
   scale_linetype_discrete(name = "feature\ncontrast") +
   ylim(-.75,.75) +
   xlab("number of distractors") +
-  ylab("mean normalized response times")
+  ylab("mean normalized response times") +
+  ggtitle("c") +
+  theme(plot.title = element_text(hjust = -0.075, face = "bold", size = 30))
 
 
 # ------------------------------------------------------------------------------
